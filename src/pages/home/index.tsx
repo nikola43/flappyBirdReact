@@ -9,9 +9,11 @@ import menu from '../../components/Menu'
 import pipes from '../../components/Pipes'
 import score from '../../components/Score'
 import endMenu from '../../components/EndMenu'
-import { useHistory } from "react-router-dom";
 import { useWeb3React } from "@web3-react/core";
-import PacManGameAbi from "../../blockchain/abi/PacManGame.json";
+import { injected } from "../../blockchain/metamaskConnector";
+import GameAbi from "../../blockchain/abi/GameAbi.json";
+import axios from 'axios';
+
 interface IScreen {
   renderCanvas: () => void;
   updateCanvas: () => void;
@@ -25,11 +27,14 @@ declare global {
     endScreen: IScreen
     score: number;
     die: boolean;
+    account: string;
   }
 }
 
 window.score = 0;
 window.bestScore = 0;
+
+
 
 export default function GamePage(): ReactElement {
 
@@ -38,25 +43,26 @@ export default function GamePage(): ReactElement {
   const [context, setContext] = useState<CanvasRenderingContext2D | null>()
   const [gameSprite, setGameSprite] = useState<HTMLImageElement | null>()
   const [gameSounds, setGameSounds] = useState<HTMLAudioElement[] | null>(null)
-  const history = useHistory();
 
   const [gamePrice, setGamePrice] = useState();
-  const [gameStarted, setGameStarted] = useState(false);
+  const [gameEnabled, setGameEnabled] = useState(false);
+  const [highscore, setHighscore] = useState(0);
+  const apiUrl = "https://flappy-api-9iej.vercel.app/updateWinnerScore"
+
 
   const { active, account, library, activate, deactivate, chainId } =
     useWeb3React();
   const selectedNetwork = 80001;
 
-  let pancmanGameAddress = "0x0000fF0d724a25FBBcB1504642CF1713D3c13fac";
-  let pancmanGameContract: any;
+  let gameAddress = "0x97f9f3D1061E5775EcdA2032647E16F81fF15762";
+  let gameContract: any;
 
   if (account && library) {
-    pancmanGameContract = new library.eth.Contract(
-      PacManGameAbi,
-      pancmanGameAddress
+    gameContract = new library.eth.Contract(
+      GameAbi,
+      gameAddress
     );
   }
-
 
   let frames = 0;
 
@@ -64,54 +70,7 @@ export default function GamePage(): ReactElement {
     window.currentScreen = newScreen
   }
 
-  const getGamePrice = async () => {
-    return pancmanGameContract.methods
-      .playPrice()
-      .call()
-      .then((res: any) => {
-        console.log("res", res);
-        return res;
-      });
-  };
-  const isGameStarted = async () => {
-    return pancmanGameContract.methods
-      .gameStarted()
-      .call()
-      .then((res: any) => {
-        console.log("res", res);
-        return res;
-      });
-  };
-
   useEffect(() => {
-
-
-
-
-    if (account && library) {
-      isGameStarted().then((res) => {
-        console.log("isGameStarted", res);
-
-      });
-
-      getGamePrice().then((res) => {
-        setGamePrice(res);
-        console.log("getGamePrice", res);
-      });
-    }
-  }, [activate, chainId, account]);
-
-  useEffect(() => {
-    const isPaid = localStorage.getItem("gameId");
-    if (isPaid == undefined || isPaid?.length === 0) {
-      history.push("/");
-    }
-  }, [])
-
-  useEffect(() => {
-
-
-
     let canvas = canvasRef.current;
     let context = canvas?.getContext('2d');
     let sprites = new Image();
@@ -193,22 +152,29 @@ export default function GamePage(): ReactElement {
           Floor.render();
           Bird.render();
         },
-        click: () => {
-          play().then(() => {
-            console.log("play");
-          })
+        click: async () => {
+          // Score.reset();
+          // Bird.reset();
+          // Pipes.resetPipes();
+          // Pipes.reset(null);
+          // switchScreen(initScreen)
 
-          Score.reset();
-          Bird.reset();
-          Pipes.resetPipes();
-          Pipes.reset(null);
-          switchScreen(initScreen)
+          console.log('highscore', highscore)
+          console.log('bestScore', window.bestScore)
+          if (Number(window.bestScore) > Number(highscore)) {
+            console.log('New highscore!')
+            const data = { winnerScore: window.bestScore, winnerAddress: window.account }
+            console.log(data)
 
+            const r = await axios.post(apiUrl, data).then((res) => {
+              console.log(res)
+              window.location.reload();
+            }).catch((err) => {
+              console.log(err)
+              window.location.reload();
+            })
+          }
 
-
-          //localStorage.setItem("gameId", "");
-          //window.removeEventListener('click', () => { });
-          //history.push("/");
         },
         updateCanvas: () => {
           Bird.update((Floor.y + 23), null);
@@ -227,43 +193,6 @@ export default function GamePage(): ReactElement {
     }
   }, [gameSprite, context])
 
-  window.addEventListener('click', async (e) => {
-
-    if (window.currentScreen && window.currentScreen.click) {
-      window.currentScreen.click()
-    }
-
-  })
-
-
-  const playGame = async (gamePrice: any) => {
-    return pancmanGameContract.methods
-      .play()
-      .send({ from: account, value: gamePrice })
-      .then((res: any) => {
-        console.log("res", res);
-        return res;
-      })
-      .catch((ex: any) => {
-        console.error(ex.message);
-        return undefined;
-      });
-  };
-
-
-
-  async function play() {
-    await playGame(gamePrice).then((res) => {
-      console.log("playGame", res);
-      if (res !== undefined) {
-        localStorage.setItem("gameId", res.transactionHash);
-        history.push("/game");
-      }
-    })
-  }
-
-
-
   const looping = () => {
     context?.clearRect(0, 0, canvasEl?.width as number, canvasEl?.height as number);
 
@@ -275,9 +204,173 @@ export default function GamePage(): ReactElement {
 
   }
 
+  const getGamePrice = async () => {
+    return await gameContract.methods
+      .playPrice()
+      .call()
+  };
+  const isGameStarted = async () => {
+    return await gameContract.methods
+      .gameStarted()
+      .call()
+  };
+
+  useEffect(() => {
+    if (!active) {
+      connectMetamask();
+    }
+
+    if (chainId !== selectedNetwork) {
+      switchNetwork();
+    }
+
+    if (account && library) {
+      isGameStarted().then((res) => {
+        console.log("isGameStarted", res);
+      });
+
+      getGamePrice().then((res) => {
+        console.log("getGamePrice", res);
+        setGamePrice(res);
+      });
+
+      getHighScore().then((res) => {
+        console.log(res)
+        setHighscore(res)
+      })
+    }
+  }, [activate, chainId, account]);
+
+  const toHex = (num: string) => {
+    const val = Number(num);
+    return "0x" + val.toString(16);
+  };
+
+  const switchNetwork = async () => {
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: toHex(selectedNetwork.toString()) }],
+      });
+    } catch (switchError: any) {
+      console.log(switchError);
+
+      if (switchError.code === 4902) {
+        //await addNetwork(selectedNetwork.toString());
+      }
+    }
+  };
+
+
+  async function connectMetamask() {
+    try {
+      if (
+        window.ethereum &&
+        window.ethereum.networkVersion !== selectedNetwork.toString()
+      ) {
+        switchNetwork();
+      }
+
+      await activate(injected, undefined, true);
+      localStorage.setItem("isWalletConnected", "true");
+      localStorage.setItem("connector", "injected");
+    } catch (ex) {
+      console.log("Please install Metamask");
+      console.log(ex);
+    }
+  }
+
+  function getWalletAbreviation(walletAddress: string) {
+    if (walletAddress !== null && walletAddress !== undefined) {
+      return walletAddress.slice(0, 6) + "..." + walletAddress.slice(-4);
+    }
+    return "";
+  }
+
+  async function disconnect() {
+    try {
+      deactivate();
+      localStorage.setItem("isWalletConnected", "false");
+      localStorage.removeItem("connector");
+    } catch (ex) {
+      console.log(ex);
+    }
+  }
+
+  const getHighScore = async () => {
+    return gameContract.methods
+      .highScore()
+      .call()
+      .then((res: any) => {
+        console.log("res", res);
+        return res;
+      });
+  };
+
+
+
+
   return (
-    <Container className='display-flex'>
-      <canvas width='518' height='540' ref={canvasRef} />
+    <Container className='display-flex' >
+      <canvas width='518' height='540' ref={canvasRef} onClick={async (e) => {
+        if (!gameEnabled) {
+          // await gameContract.methods
+          //   .play()
+          //   .send({ from: account, value: gamePrice })
+          //   .then((res: any) => {
+          //     console.log("res", res);
+          //     setGameEnabled(true);
+          //   })
+          window.account = account!;
+          setGameEnabled(true);
+        }
+
+
+        window.addEventListener('click', async () => {
+          if (window.currentScreen && window.currentScreen.click) {
+            window.currentScreen.click()
+          }
+        })
+      }}>
+      </canvas>
+
+
     </Container>
   )
 }
+
+/*
+      <button
+        onClick={active ? disconnect : connectMetamask}
+        style={{ color: "black", cursor: "pointer", marginTop: "20px" }}
+      >
+        {active && account
+          ? `Connected: ${getWalletAbreviation(account!)}`
+          : "Connect Metamask"}
+      </button>
+*/
+
+/*
+ getHighScore().then((res) => {
+        console.log(res)
+        console.log(highscore)
+        if (Number(highscore) > Number(res)) {
+          console.log('New highscore!')
+          fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ winnerScore: highscore, winnerAddress: account }),
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Success:', data);
+              toast.success('New highscore!')
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+            });
+        }
+      })
+*/

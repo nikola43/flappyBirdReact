@@ -1,9 +1,9 @@
-import {createGlobalStyle} from 'styled-components'
+import { createGlobalStyle } from 'styled-components'
 
 import { ITheme } from '../interfaces/mainInterfaces'
 
 declare module 'styled-components' {
-  interface DefaultTheme extends ITheme{}
+    interface DefaultTheme extends ITheme { }
 }
 
 export default createGlobalStyle`
@@ -27,6 +27,7 @@ export default createGlobalStyle`
     }
 
     .display-flex{
+        flex-direction: column;
         display: flex;
         justify-content: center;
         align-items: center;

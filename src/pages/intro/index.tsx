@@ -1,7 +1,7 @@
 import React, { ReactElement, useRef, useEffect, useState } from 'react'
 import { useWeb3React } from "@web3-react/core";
 import { injected } from "../../blockchain/metamaskConnector";
-import PacManGameAbi from "../../blockchain/abi/PacManGame.json";
+import GameAbi from "../../blockchain/abi/GameAbi.json";
 import { useHistory } from "react-router-dom";
 
 export default function Intro(): ReactElement {
@@ -20,7 +20,7 @@ export default function Intro(): ReactElement {
 
     if (account && library) {
         pancmanGameContract = new library.eth.Contract(
-            PacManGameAbi,
+            GameAbi,
             pancmanGameAddress
         );
     }
@@ -64,6 +64,7 @@ export default function Intro(): ReactElement {
         }
     }
 
+
     const getGamePrice = async () => {
         return pancmanGameContract.methods
             .playPrice()
@@ -105,6 +106,16 @@ export default function Intro(): ReactElement {
         }
     }, [activate, chainId, account]);
 
+    const getHighScore = async () => {
+        return pancmanGameContract.methods
+            .highScore()
+            .call()
+            .then((res: any) => {
+                console.log("res", res);
+                return res;
+            });
+    };
+
     const playGame = async (gamePrice: any) => {
         return pancmanGameContract.methods
             .play()
@@ -120,13 +131,14 @@ export default function Intro(): ReactElement {
     };
 
     async function play() {
-        await playGame(gamePrice).then((res) => {
-            console.log("playGame", res);
-            if (res !== undefined) {
-                localStorage.setItem("gameId", res.transactionHash);
-                history.push("/game");
-            }
-        })
+        // await playGame(gamePrice).then((res) => {
+        //     console.log("playGame", res);
+        //     if (res !== undefined) {
+        //         localStorage.setItem("gameId", res.transactionHash);
+        //         history.push("/game");
+        //     }
+        // })
+        history.push("/game");
     }
 
     function getWalletAbreviation(walletAddress: string) {

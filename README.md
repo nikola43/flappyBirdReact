@@ -6,7 +6,7 @@
 
 # Deploy
 
-[Netlify]([https://game-flappy-bird.vercel.app/](https://652ad6eeb9951d5bd09137fa--silly-genie-8a80b9.netlify.app/))
+[Vercel Deploy](https://game-flappy-bird.vercel.app/)
 
 ## Features
 
