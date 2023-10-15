@@ -13,7 +13,7 @@ import { useWeb3React } from "@web3-react/core";
 import { injected } from "../../blockchain/metamaskConnector";
 import GameAbi from "../../blockchain/abi/GameAbi.json";
 import axios from 'axios';
-
+import toast, { Toaster } from 'react-hot-toast';
 interface IScreen {
   renderCanvas: () => void;
   updateCanvas: () => void;
@@ -312,19 +312,28 @@ export default function GamePage(): ReactElement {
 
   return (
     <Container className='display-flex' >
+      <div><Toaster /></div>
       <canvas width='518' height='540' ref={canvasRef} onClick={async (e) => {
         if (!gameEnabled) {
-          // await gameContract.methods
-          //   .play()
-          //   .send({ from: account, value: gamePrice })
-          //   .then((res: any) => {
-          //     console.log("res", res);
-          //     setGameEnabled(true);
-          //   })
+          await gameContract.methods
+            .play()
+            .send({ from: account, value: gamePrice })
+            .then((res: any) => {
+              console.log("res", res);
+              setGameEnabled(true);
+              toast.success('Game started!')
+            }, (err: any) => {
+              console.log("err", err);
+              toast.error(err.message || 'Error')
+            })
           window.account = account!;
-          setGameEnabled(true);
+          //setGameEnabled(true);
         }
 
+        if (!gameEnabled) {
+          e.preventDefault();
+          return;
+        }
 
         window.addEventListener('click', async () => {
           if (window.currentScreen && window.currentScreen.click) {
