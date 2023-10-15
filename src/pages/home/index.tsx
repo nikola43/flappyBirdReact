@@ -84,10 +84,21 @@ export default function GamePage(): ReactElement {
   };
 
   useEffect(() => {
+    if (account && library) {
+      isGameStarted().then((res) => {
+        console.log("isGameStarted", res);
 
+      });
 
+      getGamePrice().then((res) => {
+        setGamePrice(res);
+        console.log("getGamePrice", res);
+      });
+    }
+  }, []);
 
-
+  /*
+    useEffect(() => {
     if (account && library) {
       isGameStarted().then((res) => {
         console.log("isGameStarted", res);
@@ -100,6 +111,7 @@ export default function GamePage(): ReactElement {
       });
     }
   }, [activate, chainId, account]);
+  */
 
   useEffect(() => {
     const isPaid = localStorage.getItem("gameId");
@@ -177,6 +189,7 @@ export default function GamePage(): ReactElement {
           Bird.render();
         },
         click: () => {
+          if (!gameStarted) return;
           switchScreen(gameScreen)
         },
         updateCanvas: () => {
@@ -194,18 +207,11 @@ export default function GamePage(): ReactElement {
           Bird.render();
         },
         click: () => {
-          play().then(() => {
-            console.log("play");
-          })
-
           Score.reset();
           Bird.reset();
           Pipes.resetPipes();
           Pipes.reset(null);
           switchScreen(initScreen)
-
-
-
           //localStorage.setItem("gameId", "");
           //window.removeEventListener('click', () => { });
           //history.push("/");
@@ -228,6 +234,8 @@ export default function GamePage(): ReactElement {
   }, [gameSprite, context])
 
   window.addEventListener('click', async (e) => {
+
+
 
     if (window.currentScreen && window.currentScreen.click) {
       window.currentScreen.click()
@@ -276,7 +284,13 @@ export default function GamePage(): ReactElement {
   }
 
   return (
-    <Container className='display-flex'>
+    <Container className='display-flex' onClick={() => {
+      if (!gameStarted) {
+        play().then(() => {
+          //setGameStarted(true);
+        })
+      }
+    }}>
       <canvas width='518' height='540' ref={canvasRef} />
     </Container>
   )
