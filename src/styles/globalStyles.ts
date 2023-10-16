@@ -18,7 +18,8 @@ export default createGlobalStyle`
     }
 
     html, body{
-        background: ${props => props.theme.background};
+        background: url('background.jpg');
+        size: cover;
     }
 
     a{
