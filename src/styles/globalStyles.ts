@@ -31,6 +31,7 @@ export default createGlobalStyle`
         flex-direction: row;
         display: flex;
         justify-content: space-evenly;
-        align-items: center;
+        align-items: space-evenly;
+        flex-wrap: wrap;
     }
 `
