@@ -14,10 +14,17 @@ import { injected } from "../../blockchain/metamaskConnector";
 import GameAbi from "../../blockchain/abi/GameAbi.json";
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
+import style from "./table.module.css";
+
 interface IScreen {
   renderCanvas: () => void;
   updateCanvas: () => void;
   click?: () => void;
+}
+
+interface IRank {
+  address: string;
+  score: number;
 }
 
 declare global {
@@ -48,6 +55,7 @@ export default function GamePage(): ReactElement {
   const [gameEnabled, setGameEnabled] = useState(false);
   const [highscore, setHighscore] = useState(0);
   const apiUrl = "https://flappy-api-9iej.vercel.app/updateWinnerScore"
+  const [rankList, setRankList] = useState([] as IRank[]);
 
 
   const { active, account, library, activate, deactivate, chainId } =
@@ -215,6 +223,15 @@ export default function GamePage(): ReactElement {
       .call()
   };
 
+  const getRanking = async () => {
+    return gameContract.methods
+      .getRanking()
+      .call()
+      .then((res: any) => {
+        return res;
+      });
+  };
+
   useEffect(() => {
     if (!active) {
       connectMetamask();
@@ -238,6 +255,30 @@ export default function GamePage(): ReactElement {
         console.log(res)
         setHighscore(res)
       })
+
+      getRanking().then((res1) => {
+        console.log("getRanking", res1);
+
+        let rankList = [];
+        for (let i = 0; i < res1.length; i++) {
+          console.log("res1[i]", res1[i]);
+
+          rankList.push({
+            address: res1[i][0],
+            score: res1[i][1],
+          });
+
+        }
+
+
+        rankList.sort((a, b) => {
+          return b.score - a.score;
+        });
+        console.log("rankList", rankList);
+        setRankList(rankList);
+
+
+      });
     }
   }, [activate, chainId, account]);
 
@@ -307,6 +348,19 @@ export default function GamePage(): ReactElement {
       });
   };
 
+  function getRankEmoji(rank: number) {
+    switch (rank) {
+      case 1:
+        return "🥇";
+      case 2:
+        return "🥈";
+      case 3:
+        return "🥉";
+      default:
+        return "";
+    }
+  }
+
 
 
 
@@ -343,6 +397,30 @@ export default function GamePage(): ReactElement {
       }}>
       </canvas>
 
+      <div className={style.rankContainer}>
+        <h1 style={{ color: 'white' }}>Leaderboard</h1>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Wallet</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rankList.map((row, index) => {
+              return (
+                <tr key={index}>
+                  {<td>{index + 1}  {getRankEmoji(index + 1)}</td>}
+                  <td>{row.address}</td>
+                  <td>{row.score}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
     </Container>
   )

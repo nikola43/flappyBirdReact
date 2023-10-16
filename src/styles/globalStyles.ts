@@ -27,9 +27,9 @@ export default createGlobalStyle`
     }
 
     .display-flex{
-        flex-direction: column;
+        flex-direction: row;
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         align-items: center;
     }
 `
