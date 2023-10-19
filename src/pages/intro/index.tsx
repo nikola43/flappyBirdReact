@@ -15,7 +15,7 @@ export default function Intro(): ReactElement {
         useWeb3React();
     const selectedNetwork = 80001;
 
-    let pancmanGameAddress = "0x0000fF0d724a25FBBcB1504642CF1713D3c13fac";
+    let pancmanGameAddress = "0x03be71Ec45e755174abD71502B60B4F2aF815675";
     let pancmanGameContract: any;
 
     if (account && library) {

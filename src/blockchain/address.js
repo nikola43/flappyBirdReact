@@ -7,9 +7,9 @@ export const SupportedChainId = {
 
 export const PacmanAddressess = {
   [SupportedChainId.POLYGON_MAINNET]: "",
-  [SupportedChainId.POLYGON_TESTNET]: "0x36858A3C5D7afCf0416DC13cfb618e3098976Ee9",
+  [SupportedChainId.POLYGON_TESTNET]: "0x03be71Ec45e755174abD71502B60B4F2aF815675",
   [SupportedChainId.POLYGON_HEX_MAINNET]: "",
-  [SupportedChainId.POLYGON_HEX_TESTNET]: "0x36858A3C5D7afCf0416DC13cfb618e3098976Ee9",
+  [SupportedChainId.POLYGON_HEX_TESTNET]: "0x03be71Ec45e755174abD71502B60B4F2aF815675",
 };
 
 export default module.exports = {

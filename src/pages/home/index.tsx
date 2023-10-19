@@ -62,7 +62,7 @@ export default function GamePage(): ReactElement {
     useWeb3React();
   const selectedNetwork = 80001;
 
-  let gameAddress = "0x97f9f3D1061E5775EcdA2032647E16F81fF15762";
+  let gameAddress = "0x03be71Ec45e755174abD71502B60B4F2aF815675";
   let gameContract: any;
 
   if (account && library) {
