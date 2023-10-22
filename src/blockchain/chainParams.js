@@ -1,7 +1,7 @@
 const ChainParams = [
   // arbitrum testnet
   {
-    chainId: 80001,
+    chainId: 1,
     chainName: "Polygon Mumbai Testnet",
     nativeCurrency: {
       name: "MATIC",
@@ -22,6 +22,17 @@ const ChainParams = [
     },
     rpcUrls: ["https://polygon-rpc.com"],
     blockExplorerUrls: ["https://polygonscan.com/"],
+  },
+  {
+    chainId: 1,
+    chainName: "eth mainnet",
+    nativeCurrency: {
+      name: "ETH",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    rpcUrls: ["https://eth.llamarpc.com"],
+    blockExplorerUrls: ["https://etherscan.io/"],
   }
 ];
 

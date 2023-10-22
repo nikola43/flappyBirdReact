@@ -1,7 +1,7 @@
 import { InjectedConnector } from '@web3-react/injected-connector'
 
 export const injected = new InjectedConnector({
-    supportedChainIds: [137, 80001],
+    supportedChainIds: [1, 137, 1],
 })
 
 // @ts-ignore

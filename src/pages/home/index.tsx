@@ -54,15 +54,15 @@ export default function GamePage(): ReactElement {
   const [gamePrice, setGamePrice] = useState();
   const [gameEnabled, setGameEnabled] = useState(false);
   const [highscore, setHighscore] = useState(0);
-  const apiUrl = "https://flappy-api-9iej.vercel.app/updateWinnerScore"
+  const apiUrl = "https://flappybird-api.vercel.app/updateWinnerScore"
   const [rankList, setRankList] = useState([] as IRank[]);
 
 
   const { active, account, library, activate, deactivate, chainId } =
     useWeb3React();
-  const selectedNetwork = 80001;
+  const selectedNetwork = 1;
 
-  let gameAddress = "0x03be71Ec45e755174abD71502B60B4F2aF815675";
+  let gameAddress = "0x22385C2b0Ce23b30a0795B1C6973d80E8419E4Af";
   let gameContract: any;
 
   if (account && library) {
