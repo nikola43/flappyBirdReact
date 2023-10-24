@@ -56,6 +56,8 @@ export default function GamePage(): ReactElement {
   const [highscore, setHighscore] = useState(0);
   const apiUrl = "https://flappybird-api.vercel.app/updateWinnerScore"
   const [rankList, setRankList] = useState([] as IRank[]);
+  const [open, setOpen] = React.useState(false);
+
 
 
   const { active, account, library, activate, deactivate, chainId } =
@@ -361,6 +363,9 @@ export default function GamePage(): ReactElement {
     }
   }
 
+  const handleOpen = () => {
+    setOpen(!open);
+  };
 
 
 
@@ -397,30 +402,40 @@ export default function GamePage(): ReactElement {
       }}>
       </canvas>
 
-      <div className={style.rankContainer}>
-        <h1 style={{ color: 'white' }}>Leaderboard</h1>
+      {open ? null : <button className={style.myButton} onClick={handleOpen}>Show leaderboard</button>}
 
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Wallet</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rankList.map((row, index) => {
-              return (
-                <tr key={index}>
-                  {<td>{index + 1}  {getRankEmoji(index + 1)}</td>}
-                  <td>{row.address}</td>
-                  <td>{row.score}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+
+
+      {open ?
+        <div className={style.rankContainer}>
+
+          <button style={{ marginBottom: "1rem" }} className={style.myButton} onClick={handleOpen}>Hide leaderboard</button>
+
+          <h1 style={{ color: 'white' }}>Leaderboard</h1>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Wallet</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rankList.map((row, index) => {
+                return (
+                  <tr key={index}>
+                    {<td>{index + 1}  {getRankEmoji(index + 1)}</td>}
+                    <td>{row.address}</td>
+                    <td>{row.score}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div> : null}
+
+
 
     </Container>
   )

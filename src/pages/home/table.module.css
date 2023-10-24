@@ -36,3 +36,28 @@ th {
     background-color: #CC69F5;
     color: white;
 }
+
+
+
+.myButton {
+    background-color: #1E0D31;
+    border-radius: 4px;
+    border: 1px solid #4e6096;
+    display: inline-block;
+    cursor: pointer;
+    color: #ffffff;
+    font-family: Arial;
+    font-size: 17px;
+    padding: 10px;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #283966;
+}
+
+.myButton:hover {
+    background-color: #476e9e;
+}
+
+.myButton:active {
+    position: relative;
+    top: 1px;
+}
